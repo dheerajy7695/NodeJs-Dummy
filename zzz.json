@@ -1,0 +1,15 @@
+{
+    "projectId": "1002",
+    "projectName": "Application Production",
+    "managerId": "2002",
+    "managerName": "User",
+    "managerStartDate": "1579155809769",
+    "custodianId": "C001",
+    "custodianName": "Testing",
+    "custodianDate": "1579155809769",
+    "shipDate": "1579155809769",
+    "expiryDate": "1579155809769",
+    "comments": "Creating a simple prodcution project",
+    "created": "1586254684339",
+    "updated": "1586254684339"
+}
