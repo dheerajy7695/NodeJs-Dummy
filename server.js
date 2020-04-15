@@ -7,6 +7,7 @@ const cors = require('cors');
 const dbConnect = require('./api/config/dbConnection')
 const userRoutes = require('./api/modules/users/routes/user.routes');
 const projectRoutes = require('./api/modules/projects/routes/project.route');
+const itemRoutes = require('./api/modules/items/routes/item.route');
 
 const app = express();
 
@@ -24,3 +25,4 @@ app.use(bodyParser.json());
 
 app.use('/api', userRoutes);
 app.use('/api', projectRoutes);
+app.use('/api', itemRoutes);
