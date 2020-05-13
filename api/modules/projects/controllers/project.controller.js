@@ -79,3 +79,30 @@ module.exports.getProhectById = (req, res) => {
         }
     })
 };
+
+module.exports.searchProject = (req, res) => {
+    if (!req.params.projectName) {
+        return res.status(400).res.json('Project name is required');
+    }
+    projectService.searchProject(req.params, (err, response) => {
+        if (err) {
+            console.log('searchProject function have error in controller', err.errmsg);
+            res.status(err.status || 400).json({ message: err.message || 'Bad request', status: err.status || 400 });
+        } else {
+            console.log('searchProject function executed successfully in controller');
+            res.status(200).json(response);
+        }
+    })
+};
+
+module.exports.getProjectCounts = (req, res) => {
+    projectService.getProjectCounts(req.params, (err, response) => {
+        if (err) {
+            console.log('getProjectCounts function have error in controller', err.errmsg);
+            res.status(err.status || 400).json({ message: err.message || 'Bad request', status: err.status || 400 });
+        } else {
+            console.log('getProjectCounts function executed successfully in controller');
+            res.status(200).json(response);
+        }
+    })
+};

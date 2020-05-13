@@ -22,6 +22,10 @@ const ItemShema = new Schema({
         type: String,
         require: true
     },
+    projectId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Project'
+    },
     created: {
         type: String,
     },

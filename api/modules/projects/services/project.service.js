@@ -105,3 +105,43 @@ module.exports.getProjectById = (params, cb) => {
         }
     })
 };
+
+module.exports.searchProject = (params, cb) => {
+
+    let dbQuery = {
+        "$or": [
+            {
+                projectName: { "$regex": params.projectName, "$options": "i" }
+            },
+            {
+                projectId: { "$regex": params.projectName, "$options": "i" }
+            }]
+    }
+
+    Project.find(dbQuery, (err, response) => {
+        if (err) {
+            console.log('searchProject function have error', err.errmsg);
+            cb({ message: err.errmsg || 'Bad request', status: err.status || 400 });
+        } else {
+            if (response.length) {
+                console.log('searchProject function executed successfully');
+                cb(null, response);
+            } else {
+                console.log('searchProject function have error in service');
+                cb({ message: 'No record found', status: 404 });
+            }
+        }
+    })
+};
+
+module.exports.getProjectCounts = (params, cb) => {
+    Project.count({}, (err, response) => {
+        if (err) {
+            console.log('getProjectCounts function have error', err.errmsg);
+            cb({ message: err.errmsg || 'Bad request', status: err.status || 400 });
+        } else {
+            console.log('getProjectCounts function executed successfully');
+            cb(null, { count: response });
+        }
+    })
+};

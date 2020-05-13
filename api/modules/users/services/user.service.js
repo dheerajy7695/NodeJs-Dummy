@@ -18,3 +18,15 @@ module.exports.getUsers = (req, res, callback) => {
         }
     })
 };
+
+module.exports.getUserCounts = (params, cb) => {
+    User.count({}, (err, response) => {
+        if (err) {
+            console.log('getUserCounts function have error', err.errmsg);
+            cb({ message: err.errmsg || 'Bad request', status: err.status || 400 });
+        } else {
+            console.log('getUserCounts function executed successfully');
+            cb(null, { count: response });
+        }
+    })
+};

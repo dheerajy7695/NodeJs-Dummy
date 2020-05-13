@@ -10,4 +10,7 @@ router.delete('/project/delete/:id', projectController.deleteProject);
 router.get('/project/get', projectController.getProjects);
 router.get('/project/getById/:id', projectController.getProhectById);
 
+router.get('/project/serach/:projectName', projectController.searchProject);
+router.get('/project/getCount', projectController.getProjectCounts);
+
 module.exports = router;

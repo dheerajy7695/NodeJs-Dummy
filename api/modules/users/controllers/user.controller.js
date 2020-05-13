@@ -1,5 +1,7 @@
 'use strict';
+
 const User = require('../models/user.model');
+var userService = require('../services/user.service');
 
 
 module.exports.createUser = (req, res) => {
@@ -52,7 +54,7 @@ module.exports.loginUser = (req, res) => {
             } else {
                 if (userResponse && userResponse.length) {
                     console.log('LoginUser function executed successfully', userResponse);
-                    res.status(200).json(userResponse);
+                    res.status(200).json(userResponse[0]);
                 } else {
                     console.log('LoginUser function has error user not found');
                     res.status(400).send("User not found");
@@ -88,7 +90,7 @@ module.exports.getUserById = (req, res) => {
     User.findOne(dbQuery, function (err, response) {
         if (err) {
             console.log('getUserById function has error user not found', err);
-            res.status(err.status || 400).json({ message: err.errmsg || 'Bad request' });
+            res.status(err.status || 400).json({ message: err.errmsg || 'User not found' });
         } else {
             console.log('getUserById function executed successfully');
             res.status(200).json(response);
@@ -96,10 +98,17 @@ module.exports.getUserById = (req, res) => {
     })
 };
 
-exports.findOne = function (req, res) {
-    User.findOne({ username: req.params.username }, function (err, product) {
-        if (err) res.status(400).send(err);;
-        res.status(200).json(response);
+exports.getUserByUsername = function (req, res) {
+    let dbQuery = { username: req.params.username };
+
+    User.findOne(dbQuery, function (err, response) {
+        if (err && response != 'null') {
+            console.log('getUserByUsername function has error user not found', err);
+            res.status(err.status || 400).json({ message: err.errmsg || 'User not found' });
+        } else {
+            console.log('getUserByUsername function executed successfully');
+            res.status(200).json(response);
+        }
     })
 };
 
@@ -110,6 +119,18 @@ module.exports.deleteUser = (req, res) => {
             res.status(404).json({ status: err ? err.status : 404, message: err || 'User not found' });
         } else {
             console.log('deleteUser function executed successfully');
+            res.status(200).json(response);
+        }
+    })
+};
+
+module.exports.getUserCounts = (req, res) => {
+    userService.getUserCounts(req.params, (err, response) => {
+        if (err) {
+            console.log('getUserCounts function have error in controller', err.errmsg);
+            res.status(err.status || 400).json({ message: err.message || 'Bad request', status: err.status || 400 });
+        } else {
+            console.log('getUserCounts function executed successfully in controller');
             res.status(200).json(response);
         }
     })
