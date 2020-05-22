@@ -1,5 +1,6 @@
 'use strict';
 
+const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -14,11 +15,6 @@ let UserSchema = new Schema({
         max: 50
     },
     password: {
-        type: String,
-        require: true,
-        max: 50
-    },
-    confirmPassword: {
         type: String,
         require: true,
         max: 50
@@ -68,3 +64,18 @@ let UserSchema = new Schema({
 })
 
 module.exports = mongoose.model('User', UserSchema);
+
+UserSchema.pre('save', function (next) {
+    var user = this;
+    console.log('------------------------>');
+    bcrypt.genSalt(10, (err, salt) => {
+
+        bcrypt.hash(user.password, salt, function (err, hash) {
+            if (err) {
+                return next(err);
+            }
+            user.password = hash;
+            next();
+        })
+    })
+});
