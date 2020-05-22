@@ -4,6 +4,7 @@ const User = require('../models/user.model');
 var userService = require('../services/user.service');
 
 
+
 module.exports.createUser = (req, res) => {
     let user = new User({
         username: req.body.username,
