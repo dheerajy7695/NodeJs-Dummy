@@ -40,7 +40,7 @@ module.exports.getProjects = (req, cb) => {
                 cb(null, response);
             } else {
                 console.log('getProjects function has error Project not found');
-                cb({ status: err.status || 404, message: err.errmsg || 'Project not found' });
+                cb({ status: 404, message: 'Project not found' });
             }
         }
     });

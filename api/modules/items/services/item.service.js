@@ -167,7 +167,7 @@ module.exports.searchItem = (params, cb) => {
             console.log('searchItem function have error', err.errmsg);
             cb({ message: err.errmsg || 'Bad request', status: err.status || 400 });
         } else {
-            if (response.length) {
+            if (response && response.length) {
                 console.log('searchItem function executed successfully');
                 cb(null, response);
             } else {
