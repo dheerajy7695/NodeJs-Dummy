@@ -1,3 +1,3 @@
 module.exports = {
-    dbUrl: 'mongodb://localhost:27017/DummayApplication'
+    dbUrl: 'mongodb+srv://testAdmin:Node_pwd65@dheeraj-mongodb-sofjk.mongodb.net/test?authSource=admin'
 }
