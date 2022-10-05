@@ -4,41 +4,58 @@ const bcrypt = require('bcrypt');
 var async = require('async');
 
 const User = require('../models/user.model');
+const accessToken = require('../../../core/token/generateToken');
 
 
-module.exports.createUser = (userData, cb) => {
+const executePWD = (user) => {
 
-    var userObj = {};
-    Object.keys(userData).forEach(key => {
-        userObj[key] = userData[key];
-    });
-
-    userObj.created = Date.now();
-    userObj.updated = Date.now();
-
-    let user = new User(userObj);
-
-    if (user._id) { user.userId = user._id }
-
-    encryptPwd(user, (err, user) => {
-        if (err) {
-            cb({ message: err.message || 'Bad request', status: err.status || "400" });
-        } else {
-            user.save((err, response) => {
-                if (err) {
-                    console.log('createUser function have error', err.errmsg);
-                    if (err && err.code && err.code == '11000') {
-                        cb({ message: err.message || 'Duplicate key', status: err.status || "409" });
+    return new Promise((resolve, reject) => {
+        if (!user.password) { return "Password is required"; }
+        bcrypt.genSalt(10, (err, salt) => {
+            if (err) {
+                return reject({ status: "400", message: "bad request" });
+            } else {
+                bcrypt.hash(user.password, salt, (err, hash) => {
+                    if (err) {
+                        return reject({ status: "400", message: "bad request" });
                     } else {
-                        cb({ message: err.message || 'Bad request', status: err.status || "400" });
+                        user.password = hash;
+                        return resolve(null, user);
                     }
-                } else {
-                    console.log('createUser function executed successfully');
-                    cb(null, response)
-                }
-            });
+                });
+            }
+        });
+    });
+};
+
+module.exports.createUser = async (userData, cb) => {
+
+    try {
+        var userObj = {};
+        Object.keys(userData).forEach(key => {
+            userObj[key] = userData[key];
+        });
+
+        userObj.created = Date.now();
+        userObj.updated = Date.now();
+
+        let user = new User(userObj);
+        if (user._id) { user.userId = user._id };
+
+        let encryptPwd = await executePWD(user);
+        let saveUser = await user.save();
+        let token = await accessToken.signAccessToken(saveUser.userId);
+        saveUser._doc.token = token;
+        return cb(null, saveUser);
+
+    } catch (err) {
+        console.log('createUser function have error', err);
+        if (err && err.code && err.code == '11000') {
+            return cb({ message: err.message || 'Duplicate key', status: err.status || "409" });
+        } else {
+            return cb({ message: err.message || 'Bad request', status: err.status || "400" });
         }
-    })
+    }
 };
 
 module.exports.updateUser = (params, reqPayload, cb) => {
@@ -199,24 +216,4 @@ module.exports.getUserByIdEmailOrUsername = (params, cb) => {
             cb(null, response);
         }
     })
-};
-
-function encryptPwd(user, cb) {
-
-    if (!user.password) { return "Password is required"; }
-
-    bcrypt.genSalt(10, (err, salt) => {
-        if (err) {
-            cb({ status: "400", message: "bad request" });
-        } else {
-            bcrypt.hash(user.password, salt, (err, hash) => {
-                if (err) {
-                    cb({ status: "400", message: "bad request" });
-                } else {
-                    user.password = hash;
-                    cb(null, user)
-                }
-            })
-        }
-    });
 };
