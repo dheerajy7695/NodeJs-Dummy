@@ -102,6 +102,19 @@ module.exports.updateUser = (params, reqPayload, cb) => {
     });
 };
 
+module.exports.deleteUser = (params, cb) => {
+
+    User.findByIdAndRemove(params.userId, function (err, response) {
+        if (err) {
+            console.log('deleteUser function has error user not found', err);
+            cb({ message: err.message || 'User not found!', status: err.status || "400" });
+        } else {
+            console.log('deleteUser function executed successfully');
+            cb(null, response);
+        }
+    })
+};
+
 module.exports.loginUser = (userReqData, cb) => {
     if (!userReqData.username || !userReqData.password) {
         cb({ status: "404", message: "Username and password is required" });
@@ -161,62 +174,31 @@ module.exports.getUserCounts = (params, cb) => {
     })
 };
 
-module.exports.getUserById = (params, cb) => {
+module.exports.getUserByIdEmailOrUsername = (params, cb) => {
 
-    let dbQuery = { userId: params.userId };
+    let dbQuery = {
+        "$or": [
+            {
+                userId: params.userId
+            },
+            {
+                username: params.username
+            },
+            {
+                email: params.email
+            }
+        ]
+    }
 
     User.findOne(dbQuery, function (err, response) {
         if (err) {
-            console.log('getUserById function has error user not found', err);
+            console.log('getUserByIdEmailOrUsername function has error user not found', err);
             cb({ message: err.message || 'User not found!', status: err.status || "400" });
         } else {
-            console.log('getUserById function executed successfully');
+            console.log('getUserByIdEmailOrUsername function executed successfully');
             cb(null, response);
         }
     })
-};
-
-module.exports.getUserByUsername = (params, cb) => {
-
-    let dbQuery = { username: params.username };
-
-    User.findOne(dbQuery, function (err, response) {
-        if (err || !response) {
-            console.log('getUserByUsername function has error user not found', err);
-            cb({ message: err ? err.message : 'User not found!', status: err ? err.status : "400" });
-        } else {
-            console.log('getUserByUsername function executed successfully');
-            cb(null, response);
-        }
-    })
-};
-
-module.exports.deleteUser = (params, cb) => {
-
-    User.findByIdAndRemove(params.userId, function (err, response) {
-        if (err) {
-            console.log('deleteUser function has error user not found', err);
-            cb({ message: err.message || 'User not found!', status: err.status || "400" });
-        } else {
-            console.log('deleteUser function executed successfully');
-            cb(null, response);
-        }
-    })
-};
-
-module.exports.getUserByEmail = (params, cb) => {
-
-    let dbQuery = { email: params.email };
-
-    User.findOne(dbQuery, function (err, response) {
-        if (err || !response) {
-            console.log('getUserByEmail function has error user not found', err);
-            cb({ message: err.message || 'User not found!', status: err.status || "400" });
-        } else {
-            console.log('getUserByEmail function executed successfully');
-            cb(null, response);
-        }
-    });
 };
 
 function encryptPwd(user, cb) {

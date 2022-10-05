@@ -5,9 +5,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 let UserSchema = new Schema({
-    userId: {
-        type: String
-    },
+    userId: { type: String },
     username: {
         type: String,
         require: true,
@@ -55,12 +53,8 @@ let UserSchema = new Schema({
         require: true,
         max: 50
     },
-    created: {
-        type: String,
-    },
-    updated: {
-        type: String,
-    }
+    created: { type: String },
+    updated: { type: String }
 })
 
 module.exports = mongoose.model('User', UserSchema);

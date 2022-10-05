@@ -82,12 +82,12 @@ module.exports.getUserCounts = (req, res) => {
 // Get user by userId
 module.exports.getUserById = (req, res) => {
 
-    userService.getUserById(req.params, (err, response) => {
+    userService.getUserByIdEmailOrUsername(req.params, (err, response) => {
         if (err) {
-            console.log('getUserById function have error in controller', err.errmsg);
+            console.log('getUserByIdEmailOrUsername function have error in controller', err.errmsg);
             res.status(err.status || 400).json({ message: err.errmsg || 'User not found' });
         } else {
-            console.log('getUserById function executed successfully in controller');
+            console.log('getUserByIdEmailOrUsername function executed successfully in controller');
             res.status(200).json(response);
         }
     })
@@ -96,12 +96,12 @@ module.exports.getUserById = (req, res) => {
 // Get user by username
 module.exports.getUserByUsername = (req, res) => {
 
-    userService.getUserByUsername(req.params, (err, response) => {
+    userService.getUserByIdEmailOrUsername(req.params, (err, response) => {
         if (err) {
-            console.log('getUserByUsername function have error in controller', err.errmsg);
+            console.log('getUserByIdEmailOrUsername function have error in controller', err.errmsg);
             res.status(err.status || 400).json({ message: err.errmsg || 'User not found' });
         } else {
-            console.log('getUserByUsername function executed successfully in controller');
+            console.log('getUserByIdEmailOrUsername function executed successfully in controller');
             res.status(200).json(response);
         }
     })
@@ -123,12 +123,12 @@ module.exports.deleteUser = (req, res) => {
 
 // Get user by Email
 module.exports.getUserByEmail = (req, res) => {
-    userService.getUserByEmail(req.params, (err, response) => {
+    userService.getUserByIdEmailOrUsername(req.params, (err, response) => {
         if (err) {
-            console.log('getUserByEmail function have error in controller', err.errmsg);
+            console.log('getUserByIdEmailOrUsername function have error in controller', err.errmsg);
             res.status(err.status || 400).json({ message: err.errmsg || 'User not found' });
         } else {
-            console.log('getUserByEmail function executed successfully in controller');
+            console.log('getUserByIdEmailOrUsername function executed successfully in controller');
             res.status(200).json(response);
         }
     })

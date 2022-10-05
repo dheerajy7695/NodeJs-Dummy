@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
-const dbUrl = require('./dbSource')
+// const dbUrl = require('./dbSource');
+
+const dbUrl = { dbUrl: "mongodb://localhost:27017/localdb1" };
 
 module.exports.dbConnection = () => {
     mongoose.connect(dbUrl.dbUrl, { useNewUrlParser: true })
