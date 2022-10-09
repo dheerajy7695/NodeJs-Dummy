@@ -26,3 +26,6 @@ app.use(bodyParser.json());
 app.use('/api', userRoutes);
 app.use('/api', projectRoutes);
 app.use('/api', itemRoutes);
+
+
+module.exports = app;
