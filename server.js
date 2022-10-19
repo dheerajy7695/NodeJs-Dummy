@@ -12,9 +12,13 @@ const logger = require('./api/core/utils/logger');
 
 const app = express();
 
-const port = process.env.PORT || 4000;
+const port = process.env.HTTP_PORT || 5000;
 
 dbConnect.dbConnection();
+
+app.get('/', (req, res) => {
+    res.send('Welcome to Dheeraj Digital Ready');
+})
 
 app.listen(port, () => {
     logger.info(`Server Web APi is running on port : ${port} mode`);

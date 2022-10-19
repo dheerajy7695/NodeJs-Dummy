@@ -10,66 +10,46 @@ let UserSchema = new Schema({
         type: String,
         require: true,
         unique: true,
-        max: 50
-    },
-    password: {
-        type: String,
-        require: true,
-        max: 50
+        minLength: 3,
+        maxLength: 25
     },
     email: {
         type: String,
         require: true,
         unique: true,
-        max: 50
+        maxLength: 25
+    },
+    password: {
+        type: String,
+        require: true,
+        minLength: 8,
+        maxLength: 25
     },
     firstName: {
         type: String,
         require: true,
-        max: 50
+        minLength: 2,
+        maxLength: 15
     },
     lastName: {
         type: String,
         require: true,
-        max: 50
+        minLength: 2,
+        maxLength: 15
     },
     phone: {
-        type: String,
+        type: Number,
         require: true,
-        max: 50
-    },
-    securityKey: {
-        type: String,
-        require: true,
-        max: 50
-    },
-    securityValue: {
-        type: String,
-        require: true,
-        max: 50
+        maxLength: 10
     },
     gender: {
         type: String,
         require: true,
-        max: 50
+        maxLength: 10
     },
     created: { type: String },
     updated: { type: String }
 })
 
-module.exports = mongoose.model('User', UserSchema);
-
-UserSchema.pre('save', function (next) {
-    var user = this;
-    console.log('------------------------>');
-    bcrypt.genSalt(10, (err, salt) => {
-
-        bcrypt.hash(user.password, salt, function (err, hash) {
-            if (err) {
-                return next(err);
-            }
-            user.password = hash;
-            next();
-        })
-    })
-});
+const User = mongoose.model('User', UserSchema);
+module.exports = User;

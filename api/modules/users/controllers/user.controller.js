@@ -1,19 +1,18 @@
 'use strict';
 
-const bcrypt = require('bcrypt');
-
 const User = require('../models/user.model');
 var userService = require('../services/user.service');
+const logger = require('../../../core/utils/logger');
 
 // Save User function
 module.exports.createUser = (req, res) => {
 
     userService.createUser(req.body, (err, response) => {
         if (err) {
-            console.log('createUser function have error in controller', err.errmsg);
+            logger.error('createUser function have error in controller', err);
             res.status(err.status).json({ message: err.message, status: err.status });
         } else {
-            console.log('createUser function executed successfully in controller');
+            logger.info('createUser function executed successfully in controller');
             res.status(200).json(response);
         }
     });
