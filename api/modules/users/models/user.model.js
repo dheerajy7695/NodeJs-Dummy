@@ -22,8 +22,7 @@ let UserSchema = new Schema({
     password: {
         type: String,
         require: true,
-        minLength: 8,
-        maxLength: 25
+        minLength: 8
     },
     firstName: {
         type: String,

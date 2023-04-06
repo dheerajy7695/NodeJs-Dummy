@@ -1,22 +1,35 @@
-const path = require('path');
+const { createLogger, format, transports } = require('winston');
+const { combine, timestamp, colorize, label, printf, align } = format;
+const { SPLAT } = require('triple-beam');
+const { isObject } = require('lodash');
 const date = require('date-and-time');
 
-const { format, createLogger, transports } = require("winston");
-const { combine, timestamp, label, printf } = format;
-const CATEGORY = "DHEERAJ";
 
-//Using the printf format.
-const customFormat = printf(({ level, message, label, timestamp }) => {
-    return `${date.format(new Date(), "YYYY-MM-DD HH:mm:ss")} [${label}] ${level}: ${message}`;
+function formatObject(param) {
+    if (isObject(param)) {
+        return [JSON.stringify(param)];
+    }
+    return [param];
+};
+
+// Ignore log messages if they have { private: true }
+const all = format((info) => {
+    const splat = info[SPLAT] || [];
+    const message = formatObject(info.message);
+    const rest = splat.map(formatObject).join(' ');
+    info.message = `${message} ${rest}`;
+    return info;
 });
 
 const logger = createLogger({
-    level: "debug",
-    format: combine(label({ label: CATEGORY }), timestamp(), customFormat),
-    transports: [
-        new transports.Console(),
-        // new transports.File({ filename: path.join(__dirname, './logs', 'dheeraj-error.log'), level: 'error' }),
-    ],
+    format: combine(
+        all(),
+        label({ label: 'LOCAL' }),
+        timestamp(),
+        colorize(),
+        printf(info => `${date.format(new Date(), "YYYY-MM-DD HH:mm:ss")} [${info.label}] ${info.level}: ${formatObject(info.message)}`)
+    ),
+    transports: [new transports.Console()]
 });
 
 module.exports = logger;
@@ -26,11 +39,27 @@ module.exports = logger;
 
 
 
+// const path = require('path');
+// const date = require('date-and-time');
 
+// const { format, createLogger, transports } = require("winston");
+// const { combine, timestamp, splat, label, printf } = format;
+// const CATEGORY = "DHEERAJ";
 
+// //Using the printf format.
+// const customFormat = printf(({ level, message, label, timestamp, ...metadata }) => {
+//     return `${date.format(new Date(), "YYYY-MM-DD HH:mm:ss")} [${label}] ${level}: ${message}`;
+// });
 
+// const logger = createLogger({
+//     level: "debug",
+//     format: combine(label({ label: CATEGORY }), format.colorize(), splat(), timestamp(), customFormat),
+//     transports: [
+//         new transports.Console(),
+//     ],
+// });
 
-
+// module.exports = logger;
 
 
 

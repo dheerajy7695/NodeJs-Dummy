@@ -4,6 +4,7 @@ var async = require('async');
 
 const User = require('../models/user.model');
 const accessToken = require('../../../core/token/generateToken');
+const logger = require('../../../core/utils/logger');
 
 
 const executePWD = (user) => {
@@ -48,7 +49,8 @@ module.exports.createUser = async (userData, cb) => {
         return cb(null, saveUser);
 
     } catch (err) {
-        console.log('createUser function have error', err);
+        // logger.error('createUser function have error', err.message);
+        logger.error('createUser function has error -' + err.message, 'userService.catch', 'USER', '123434232423423');
         if (err && err.code && err.code == '11000') {
             return cb({ message: err.message || 'Duplicate key', status: err.status || "409" });
         } else {
@@ -150,8 +152,11 @@ module.exports.loginUser = (userReqData, cb) => {
         if (err || !user) {
             cb({ status: err ? err.status : "404", message: err ? err.message : "User not found!" });
         } else {
-            bcrypt.compare(userReqData.password, user.password, function (err, result) {
+            bcrypt.compare(userReqData.password, user.password, async function (err, result) {
                 if (result === true) {
+                    let token = await accessToken.signAccessToken(user.userId);
+                    delete user._doc.password;
+                    user._doc.token = token;
                     cb(null, user);
                 } else {
                     cb({ status: "404", message: 'Wrong password!' });

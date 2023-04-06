@@ -12,7 +12,7 @@ const logger = require('./api/core/utils/logger');
 
 const app = express();
 
-const port = process.env.HTTP_PORT || 5000;
+const port = process.env.HTTP_PORT || 4000;
 
 dbConnect.dbConnection();
 
@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, () => {
-    logger.info(`Server Web APi is running on port : ${port} mode`);
+    logger.info(`Server is running on port : ${port}`);
 })
 
 app.use(cors());
