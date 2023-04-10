@@ -49,8 +49,8 @@ module.exports.createUser = async (userData, cb) => {
         return cb(null, saveUser);
 
     } catch (err) {
-        // logger.error('createUser function have error', err.message);
-        logger.error('createUser function has error -' + err.message, 'userService.catch', 'USER', '123434232423423');
+
+        logger.error('createUser function has error- ' + err.message, 'userService.catch', 'USER', '123434232423423');
         if (err && err.code && err.code == '11000') {
             return cb({ message: err.message || 'Duplicate key', status: err.status || "409" });
         } else {

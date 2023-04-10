@@ -48,10 +48,10 @@ const middleware = (schema) => {
             }
 
             logger.error(`User request body validation failed - userValidateSchema`);
-            return res.status(400).json({ status: false, error: result });
+            return res.status(400).json({ status: 400, error: result });
         }).catch((err) => {
             logger.error(`User request body validation failed - userValidateSchema`);
-            return res.status(400).json({ status: false, error: err.message });
+            return res.status(400).json({ status: 400, error: err.message });
         })
     }
 };

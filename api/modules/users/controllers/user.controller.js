@@ -9,8 +9,8 @@ module.exports.createUser = (req, res) => {
 
     userService.createUser(req.body, (err, response) => {
         if (err) {
-            logger.error('createUser function have error in controller', err);
-            res.status(err.status).json({ message: err.message, status: err.status });
+            logger.error('createUser function have error in controller' + err.message, 'userController.createUser', 'USER');
+            res.status(Number(err.status)).json({ message: err.message, status: err.status });
         } else {
             logger.info('createUser function executed successfully in controller');
             res.status(200).json(response);

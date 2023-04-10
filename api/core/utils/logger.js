@@ -1,38 +1,172 @@
-const { createLogger, format, transports } = require('winston');
-const { combine, timestamp, colorize, label, printf, align } = format;
-const { SPLAT } = require('triple-beam');
-const { isObject } = require('lodash');
+const winston = require('winston');
 const date = require('date-and-time');
+const { format } = require('winston');
+const { combine, timestamp, colorize, label, printf } = format;
 
-
-function formatObject(param) {
-    if (isObject(param)) {
-        return [JSON.stringify(param)];
-    }
-    return [param];
+function handleLog(message, method, endpoint, logTrace, level, logger, url = undefined) {
+    const logData = {
+        timestamp: date.format(new Date(), "YYYY-MM-DD HH:mm:ss"),
+        message,
+        method,
+        endpoint,
+        url,
+        logTrace
+    };
+    return logger[level](logData);
 };
 
-// Ignore log messages if they have { private: true }
-const all = format((info) => {
-    const splat = info[SPLAT] || [];
-    const message = formatObject(info.message);
-    const rest = splat.map(formatObject).join(' ');
-    info.message = `${message} ${rest}`;
-    return info;
+const customFormat = printf(({ level, message, label, method, endpoint, url, logTrace }) => {
+
+    let methodColon = method ? '-[Method: ' + method + ']' : '';
+    let endpointColon = endpoint ? '-[Endpoint: ' + endpoint + ']' : '';
+    let urlColon = url ? '-[Url: ' + url + ']' : '';
+    let logTraceColon = logTrace ? '-[LogTrace: ' + logTrace + ']' : '';
+
+    return `${date.format(new Date(), "YYYY-MM-DD HH:mm:ss")}- [${label}]- ${level} - message: ${message}${methodColon}${endpointColon}${urlColon}${logTraceColon}`;
 });
 
-const logger = createLogger({
-    format: combine(
-        all(),
-        label({ label: 'LOCAL' }),
-        timestamp(),
-        colorize(),
-        printf(info => `${date.format(new Date(), "YYYY-MM-DD HH:mm:ss")} [${info.label}] ${info.level}: ${formatObject(info.message)}`)
-    ),
-    transports: [new transports.Console()]
+let successLogger = winston.createLogger({
+    level: 'info',
+    format: combine(label({ label: 'LOCAL' }), format.colorize(), timestamp(), customFormat),
+    transports: [new winston.transports.Console()]
 });
 
-module.exports = logger;
+let errorLogger = winston.createLogger({
+    level: 'error',
+    format: combine(label({ label: 'LOCAL' }), format.colorize(), timestamp(), customFormat),
+    transports: [new winston.transports.Console()]
+});
+
+function info(message, method, endpoint, logTrace = undefined) {
+    handleLog(message, method, endpoint, logTrace, 'info', successLogger);
+};
+
+function error(message, method, endpoint, logTrace = undefined) {
+    handleLog(message, method, endpoint, logTrace, 'error', errorLogger);
+};
+
+module.exports = { info, error };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//    1 -------------------
+
+/*
+
+const winston = require('winston');
+const date = require('date-and-time');
+
+let successLogger = winston.createLogger({
+    level: 'info',
+    format: winston.format.json(),
+    transports: [new winston.transports.Console()]
+});
+
+let errorLogger = winston.createLogger({
+    level: 'error',
+    format: winston.format.json(),
+    transports: [new winston.transports.Console()]
+});
+
+function handleLog(message, method, endpoint, logTrace, level, logger, url = undefined) {
+    const logData = {
+        timestamp: date.format(new Date(), "YYYY-MM-DD HH:mm:ss"),
+        message,
+        method,
+        endpoint,
+        url,
+        logTrace
+    };
+
+    return logger[level](logData);
+};
+
+function info(message, method, endpoint, logTrace = undefined) {
+    handleLog(message, method, endpoint, logTrace, 'info', successLogger);
+};
+
+function error(message, method, endpoint, logTrace = undefined) {
+    handleLog(message, method, endpoint, logTrace, 'error', errorLogger);
+};
+
+module.exports = { info, error };
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const { createLogger, format, transports } = require('winston');
+// const { combine, timestamp, colorize, label, printf, align } = format;
+// const { SPLAT } = require('triple-beam');
+// const { isObject } = require('lodash');
+// const date = require('date-and-time');
+
+
+// function formatObject(param) {
+//     if (isObject(param)) {
+//         return [JSON.stringify(param)];
+//     }
+//     return [param];
+// };
+
+// // Ignore log messages if they have { private: true }
+// const all = format((info) => {
+//     const splat = info[SPLAT] || [];
+//     const message = formatObject(info.message);
+//     const rest = splat.map(formatObject).join(' ');
+//     info.message = `${message} ${rest}`;
+//     return info;
+// });
+
+// const logger = createLogger({
+//     format: combine(
+//         all(),
+//         label({ label: 'LOCAL' }),
+//         timestamp(),
+//         colorize(),
+//         printf(info => `${date.format(new Date(), "YYYY-MM-DD HH:mm:ss")} [${info.label}] ${info.level}: ${formatObject(info.message)}`)
+//     ),
+//     transports: [new transports.Console()]
+// });
+
+// module.exports = logger;
 
 
 
