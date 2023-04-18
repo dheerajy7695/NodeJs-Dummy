@@ -3,6 +3,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const { v4: uuidv4 } = require('uuid')
 
 const dbConnect = require('./api/core/config/dbConnection')
 const userRoutes = require('./api/modules/users/routes/user.routes');
@@ -14,10 +15,17 @@ const app = express();
 
 const port = process.env.HTTP_PORT || 4000;
 
+/* Generate reqId  */
+app.use((req, res, next) => {
+    req.headers.reqId = uuidv4();
+    next();
+});
+
+
 dbConnect.dbConnection();
 
 app.get('/', (req, res) => {
-    res.send('Welcome to Dheeraj Digital Ready');
+    res.send('Welcome to Dheeraj Digital Ready', req);
 })
 
 app.listen(port, () => {

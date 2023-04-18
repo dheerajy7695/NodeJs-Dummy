@@ -1,133 +1,141 @@
 'use strict';
 
-const User = require('../models/user.model');
 var userService = require('../services/user.service');
 const logger = require('../../../core/utils/logger');
 
-// Save User function
+/* Create user function  */
 module.exports.createUser = (req, res) => {
 
-    userService.createUser(req.body, (err, response) => {
+    userService.createUser(req, (err, response) => {
         if (err) {
-            logger.error('createUser function have error in controller' + err.message, 'userController.createUser', 'USER');
+            logger.error('createUser function have error in controller- ' + err.message, 'userController.createUser', 'USER', req.headers.reqId);
             res.status(Number(err.status)).json({ message: err.message, status: err.status });
         } else {
-            logger.info('createUser function executed successfully in controller');
+            logger.info('createUser function executed successfully', 'userController.createUser', 'USER', req.headers.reqId);
             res.status(200).json(response);
         }
     });
 };
 
-// Update User
+/* Update user function  */
 module.exports.updateUser = (req, res) => {
-    if (!req.params.id) {
-        return res.status(400).send({ message: "UserId is required" });
+    if (!req.params.userId) {
+        logger.error('updateUser function have error in controller - userId is required', 'userController.updateUser', 'USER', req.headers.reqId);
+        return res.status(400).send({ message: "userId is required" });
     }
-    userService.updateUser(req.params, req.body, (err, response) => {
+    userService.updateUser(req, (err, response) => {
         if (err) {
-            console.log('updateUser function have error in controller', err.errmsg);
-            res.status(err.status || 400).json({ message: err.errmsg || 'Bad request', status: err.status || 400 });
+            logger.error('updateUser function have error in controller' + err.message, 'userController.updateUser', 'USER', req.headers.reqId);
+            res.status(Number(err.status | 400)).json({ message: err.message, status: err.status | 400 });
         } else {
-            console.log('updateUser function executed successfully in controller');
+            logger.info('updateUser function executed successfully', 'userController.updateUser', 'USER', req.headers.reqId);
             res.status(200).json(response);
         }
     });
 };
 
-// Login User function
+/* Delete user function  */
+module.exports.deleteUser = (req, res) => {
+
+    userService.deleteUser(req, (err, response) => {
+        if (err) {
+            logger.error('deleteUser function have error in controller' + err.message, 'userController.deleteUser', 'USER', req.headers.reqId);
+            res.status(Number(err.status)).json({ message: err.message, status: err.status });
+        } else {
+            logger.info('deleteUser function executed successfully', 'userController.deleteUser', 'USER', req.headers.reqId);
+            res.status(200).json(response);
+        }
+    })
+};
+
+/* Login user function  */
 module.exports.loginUser = (req, res) => {
 
     if (!req.body.username || !req.body.password) {
-        res.status(400).json({ status: "404", message: "Username and password are required" });
+        if (!req.body.username) {
+            logger.error('loginUser function have error in controller - Username is required', 'userController.loginUser', 'USER', req.headers.reqId);
+            return res.status(400).send({ message: "Password is required" });
+        }
+        if (!req.body.password) {
+            logger.error('loginUser function have error in controller - Password is required', 'userController.loginUser', 'USER', req.headers.reqId);
+            return res.status(400).send({ message: "Password is required" });
+        }
     }
-    userService.loginUser(req.body, (err, response) => {
+    userService.loginUser(req, (err, response) => {
         if (err) {
-            console.log('loginUser function have error in controller', err.errmsg);
-            res.status(err.status).json({ message: err.message, status: err.status });
+            logger.error('loginUser function have error in controller' + err.message, 'userController.loginUser', 'USER', req.headers.reqId);
+            res.status(Number(err.status)).json({ message: err.message, status: err.status });
         } else {
-            console.log('loginUser function executed successfully in controller');
+            logger.info('loginUser function executed successfully', 'userController.loginUser', 'USER', req.headers.reqId);
             res.status(200).json(response);
         }
     });
 };
 
-// Get users
+/* Get users function  */
 module.exports.getUsers = (req, res) => {
 
-    userService.getUsers(req.params, (err, response) => {
+    userService.getUsers(req, (err, response) => {
         if (err) {
-            console.log('getUsers function have error in controller', err.errmsg);
-            res.status(err.status).json({ message: err.message, status: err.status });
+            logger.error('getUsers function have error in controller' + err.message, 'userController.getUsers', 'USER', req.headers.reqId);
+            res.status(Number(err.status)).json({ message: err.message, status: err.status });
         } else {
-            console.log('getUsers function executed successfully in controller');
+            logger.info('getUsers function executed successfully', 'userController.getUsers', 'USER', req.headers.reqId);
             res.status(200).json(response);
         }
     });
 };
 
-// Get user counts
+/* Get user count function  */
 module.exports.getUserCounts = (req, res) => {
-    userService.getUserCounts(req.params, (err, response) => {
+
+    userService.getUserCounts(req, (err, response) => {
         if (err) {
-            console.log('getUserCounts function have error in controller', err.errmsg);
-            res.status(err.status || 400).json({ message: err.message || 'Bad request', status: err.status || 400 });
+            logger.error('getUserCounts function have error in controller' + err.message, 'userController.getUserCounts', 'USER', req.headers.reqId);
+            res.status(Number(err.status)).json({ message: err.message, status: err.status });
         } else {
-            console.log('getUserCounts function executed successfully in controller');
+            logger.info('getUserCounts function executed successfully', 'userController.getUserCounts', 'USER', req.headers.reqId);
             res.status(200).json(response);
         }
     })
 };
 
-// Get user by userId
+/* Get user by userId function  */
 module.exports.getUserById = (req, res) => {
 
-    userService.getUserByIdEmailOrUsername(req.params, (err, response) => {
+    userService.getUserByIdEmailOrUsername(req, (err, response) => {
         if (err) {
-            console.log('getUserByIdEmailOrUsername function have error in controller', err.errmsg);
-            res.status(err.status || 400).json({ message: err.errmsg || 'User not found' });
+            logger.error('getUserById function have error in controller' + err.message, 'userController.getUserById', 'USER', req.headers.reqId);
+            res.status(Number(err.status)).json({ message: err.message, status: err.status });
         } else {
-            console.log('getUserByIdEmailOrUsername function executed successfully in controller');
+            logger.info('getUserById function executed successfully', 'userController.getUserById', 'USER', req.headers.reqId);
             res.status(200).json(response);
         }
     })
 };
 
-// Get user by username
+/* Get user by username function */
 module.exports.getUserByUsername = (req, res) => {
 
-    userService.getUserByIdEmailOrUsername(req.params, (err, response) => {
+    userService.getUserByIdEmailOrUsername(req, (err, response) => {
         if (err) {
-            console.log('getUserByIdEmailOrUsername function have error in controller', err.errmsg);
-            res.status(err.status || 400).json({ message: err.errmsg || 'User not found' });
+            logger.error('getUserByIdEmailOrUsername function have error in controller' + err.message, 'userController.getUserByIdEmailOrUsername', 'USER', req.headers.reqId);
+            res.status(Number(err.status)).json({ message: err.message, status: err.status });
         } else {
-            console.log('getUserByIdEmailOrUsername function executed successfully in controller');
+            logger.info('getUserByIdEmailOrUsername function executed successfully', 'userController.getUserByIdEmailOrUsername', 'USER', req.headers.reqId);
             res.status(200).json(response);
         }
     })
 };
 
-// Delete user
-module.exports.deleteUser = (req, res) => {
-
-    userService.deleteUser(req.params, (err, response) => {
-        if (err) {
-            console.log('deleteUser function have error in controller', err.errmsg);
-            res.status(err.status || 400).json({ message: err.errmsg || 'User not found' });
-        } else {
-            console.log('deleteUser function executed successfully in controller');
-            res.status(200).json(response);
-        }
-    })
-};
-
-// Get user by Email
+/* Get user by email function */
 module.exports.getUserByEmail = (req, res) => {
-    userService.getUserByIdEmailOrUsername(req.params, (err, response) => {
+    userService.getUserByIdEmailOrUsername(req, (err, response) => {
         if (err) {
-            console.log('getUserByIdEmailOrUsername function have error in controller', err.errmsg);
-            res.status(err.status || 400).json({ message: err.errmsg || 'User not found' });
+            logger.error('getUserByIdEmailOrUsername function have error in controller' + err.message, 'userController.getUserByIdEmailOrUsername', 'USER', req.headers.reqId);
+            res.status(Number(err.status)).json({ message: err.message, status: err.status });
         } else {
-            console.log('getUserByIdEmailOrUsername function executed successfully in controller');
+            logger.info('getUserByIdEmailOrUsername function executed successfully', 'userController.getUserByIdEmailOrUsername', 'USER', req.headers.reqId);
             res.status(200).json(response);
         }
     })

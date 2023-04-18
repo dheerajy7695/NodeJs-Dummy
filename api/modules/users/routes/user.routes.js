@@ -7,15 +7,17 @@ const userValidateSchema = require('../models/userValidateSchema');
 
 const { userSchema } = require('../models/userSchema');
 
-router.get('/getUser', isUserAuthenticated, userController.getUsers);
-router.post('/create-user', userValidateSchema(userSchema), userController.createUser);
 router.post('/loginUser', userController.loginUser);
-router.get('/getById/:userId', isUserAuthenticated, userController.getUserById);
-router.get('/getByUsername/:username', isUserAuthenticated, userController.getUserByUsername);
+
+router.post('/create-user', userValidateSchema(userSchema), userController.createUser);
+router.patch('/update-user/:userId', userValidateSchema(userSchema), isUserAuthenticated, userController.updateUser);
 router.delete('/delete-user/:userId', isUserAuthenticated, userController.deleteUser);
+
+router.get('/getUser', isUserAuthenticated, userController.getUsers);
 router.get('/user/getCount', isUserAuthenticated, userController.getUserCounts);
 
-router.patch('/update/:id', isUserAuthenticated, userController.updateUser);
+router.get('/getById/:userId', isUserAuthenticated, userController.getUserById);
+router.get('/getByUsername/:username', isUserAuthenticated, userController.getUserByUsername);
 router.get('/getUserByEmail/:email', isUserAuthenticated, userController.getUserByEmail);
 
 module.exports = router;

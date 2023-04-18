@@ -1,10 +1,12 @@
 'use strict';
 const bcrypt = require('bcrypt');
 var async = require('async');
+const mongoose = require('mongoose');
 
 const User = require('../models/user.model');
 const accessToken = require('../../../core/token/generateToken');
 const logger = require('../../../core/utils/logger');
+const { formatError } = require('../../../core/utils/utils');
 
 
 const executePWD = (user) => {
@@ -28,10 +30,15 @@ const executePWD = (user) => {
     });
 };
 
-module.exports.createUser = async (userData, cb) => {
+/* Create user */
+module.exports.createUser = async (req, cb) => {
 
     try {
+        let userData = req.body;
         var userObj = {};
+
+        logger.info('createUser API started ', 'userService.createUser', 'USER', req.headers.reqId);
+
         Object.keys(userData).forEach(key => {
             userObj[key] = userData[key];
         });
@@ -46,178 +53,149 @@ module.exports.createUser = async (userData, cb) => {
         let saveUser = await user.save();
         let token = await accessToken.signAccessToken(saveUser.userId);
         saveUser._doc.token = token;
+        if (saveUser._doc) delete saveUser._doc.password;
+
+        logger.info('createUser function completed successfully', 'userService.createUser', 'USER', req.headers.reqId);
         return cb(null, saveUser);
 
     } catch (err) {
-
-        logger.error('createUser function has error- ' + err.message, 'userService.catch', 'USER', '123434232423423');
-        if (err && err.code && err.code == '11000') {
-            return cb({ message: err.message || 'Duplicate key', status: err.status || "409" });
-        } else {
-            return cb({ message: err.message || 'Bad request', status: err.status || "400" });
-        }
+        logger.error('createUser function has error - ' + formatError(err), 'userService.createUser', 'USER', req.headers.reqId);
+        return cb({ message: formatError(err), status: err.status || '400' });
     }
 };
 
-module.exports.updateUser = (params, reqPayload, cb) => {
+/* Update user */
+module.exports.updateUser = async (req, cb) => {
 
-    let dbQuery = { _id: params.id || params._id };
+    let dbQuery = { _id: req.params.userId || req.param.userId };
+    let reqPayload = req.body;
 
-    async.waterfall([
-        function getUserById(callback) {
-            User.findById(dbQuery, (err, response) => {
-                if (err) {
-                    console.log('getUserById function has error to get user', err);
-                    callback(err);
-                } else {
-                    callback(null, response);
-                }
-            });
-        },
+    if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
+        return cb({ message: "Please provide the correct userId" });
+    }
 
-        function encryptPassword(userData, callback) {
+    try {
+        let updateuser = await User.findByIdAndUpdate(dbQuery, { $set: reqPayload }, { useFindAndModify: false, new: true });
 
-            Object.keys(userData).forEach(key => {
-                reqPayload[key] = userData[key];
-            });
-
-            reqPayload.updated = Date.now();
-            let updateObj = new User(reqPayload);
-
-            encryptPwd(updateObj, (err, response) => {
-                if (err) {
-                    console.log('encryptPassword function has error in updateUser', err);
-                    callback(err);
-                } else {
-                    callback(null, response);
-                }
-            })
-        },
-
-        function updateUsers(updateObj, callback) {
-
-            User.updateOne(dbQuery, { $set: updateObj }, (err, userRes) => {
-                if (err) {
-                    console.log('Update function has error', err);
-                    if (err && err.code && err.code == '11000') {
-                        cb({ message: err.message || 'Duplicate key', status: err.status || 409 });
-                    } else {
-                        cb({ message: err.message || 'Bad request', status: err.status || 400 });
-                    }
-                } else {
-                    callback(null, userRes);
-                }
-            })
-        }
-    ], function (err, result) {
-        if (err) {
-            console.log('updateUser function have error', err.message);
-            cb(err);
+        if (!updateuser) {
+            logger.error('updateUser function has error -', 'userService.updateUser', 'USER', req.headers.reqId);
+            cb({ message: formatError(err), status: err.status || 404 });
         } else {
-            console.log('updateUser function executed successfully');
-            cb(null, result);
+            logger.info('updateUser function executed successfully ', 'userService.updateUser', 'USER', req.headers.reqId);
+            if (updateuser._doc) delete updateuser._doc.password;
+            cb(null, updateuser);
+        }
+    } catch (err) {
+        logger.error('updateUser function has error - ' + formatError(err), 'userService.updateUser', 'USER', req.headers.reqId);
+        cb({ message: formatError(err), status: err.status || 400 });
+    }
+
+};
+
+/* Delete user */
+module.exports.deleteUser = (req, cb) => {
+
+    User.findByIdAndRemove(req.params.userId, { useFindAndModify: false }, (err, response) => {
+        if (err) {
+            logger.error('deleteUser function has error - ' + formatError(err), 'userService.deleteUser', 'USER', req.headers.reqId);
+            cb({ message: formatError(err), status: err.status || '400' });
+        } else {
+            logger.info('deleteUser function completed successfully', 'userService.deleteUser', 'USER', req.headers.reqId);
+            cb(null, { status: 200, message: response._doc.username + ' - user deleted successfully' });
         }
     });
 };
 
-module.exports.deleteUser = (params, cb) => {
-
-    User.findByIdAndRemove(params.userId, function (err, response) {
-        if (err) {
-            console.log('deleteUser function has error user not found', err);
-            cb({ message: err.message || 'User not found!', status: err.status || "400" });
-        } else {
-            console.log('deleteUser function executed successfully');
-            cb(null, response);
-        }
-    })
-};
-
-module.exports.loginUser = (userReqData, cb) => {
-    if (!userReqData.username || !userReqData.password) {
-        cb({ status: "404", message: "Username and password is required" });
-    }
+module.exports.loginUser = (req, cb) => {
 
     let dbQuery = {
         "$or": [
             {
-                username: userReqData.username
+                username: req.body.username
             },
             {
-                email: userReqData.username
+                email: req.body.email
             }]
     };
 
     User.findOne(dbQuery).exec(function (err, user) {
         if (err || !user) {
-            cb({ status: err ? err.status : "404", message: err ? err.message : "User not found!" });
+            logger.error('loginUser function has error - ' + formatError(err), 'userService.loginUser', 'USER', req.headers.reqId);
+            cb({ message: formatError(err), status: err.status || '404' });
         } else {
-            bcrypt.compare(userReqData.password, user.password, async function (err, result) {
+            bcrypt.compare(req.body.password, user.password, async function (err, result) {
                 if (result === true) {
                     let token = await accessToken.signAccessToken(user.userId);
                     delete user._doc.password;
                     user._doc.token = token;
+
+                    logger.info('loginUser function completed successfully', 'userService.loginUser', 'USER', req.headers.reqId);
                     cb(null, user);
                 } else {
+                    logger.error('loginUser function has error - Wrong password!', 'userService.loginUser', 'USER', req.headers.reqId);
                     cb({ status: "404", message: 'Wrong password!' });
                 }
             })
         }
     });
-}
+};
 
-module.exports.getUsers = (params, cb) => {
+module.exports.getUsers = (req, cb) => {
 
-    User.find().sort({ created: -1 }).exec(function (err, response) {
+    User.find({}, { password: 0 }).sort({ created: -1 }).exec(function (err, response) {
         if (err) {
-            console.log('getUsers function has error user not found', err.message);
-            cb({ message: err.message || 'User not found!', status: err.status || "400" });
+            logger.error('getUsers function has error - ' + formatError(err), 'userService.getUsers', 'USER', req.headers.reqId);
+            cb({ message: err.message || 'No record found', status: err.status || 400 });
         } else {
             if (response && response.length) {
                 cb(null, response);
             } else {
-                console.log('getUsers function has error user not found');
+                logger.error('getUsers function has error - User not found', 'userService.getUsers', 'USER', req.headers.reqId);
                 cb({ status: "404", message: "User not found" });
             }
         }
     })
 };
 
-module.exports.getUserCounts = (params, cb) => {
+module.exports.getUserCounts = (req, cb) => {
     User.count({}, (err, response) => {
         if (err) {
-            console.log('getUserCounts function have error', err.message);
-            cb({ message: err.message || 'Bad request', status: err.status || "400" });
+            logger.error('getUserCounts function has error - ' + formatError(err), 'userService.getUserCounts', 'USER', req.headers.reqId);
+            cb({ message: err.message || 'No record found', status: err.status || 404 });
         } else {
-            console.log('getUserCounts function executed successfully');
             cb(null, { count: response });
         }
     })
 };
 
-module.exports.getUserByIdEmailOrUsername = (params, cb) => {
+module.exports.getUserByIdEmailOrUsername = (req, cb) => {
 
     let dbQuery = {
         "$or": [
             {
-                userId: params.userId
+                userId: req.params.userId
             },
             {
-                username: params.username
+                username: req.params.username
             },
             {
-                email: params.email
+                email: req.params.email
             }
         ]
     }
 
-    User.findOne(dbQuery, function (err, response) {
+    User.findOne(dbQuery, { password: 0 }, function (err, response) {
         if (err) {
-            console.log('getUserByIdEmailOrUsername function has error user not found', err);
-            cb({ message: err.message || 'User not found!', status: err.status || "400" });
+            logger.error('getUserByIdEmailOrUsername function has error - ' + formatError(err), 'userService.getUserByIdEmailOrUsername', 'USER', req.headers.reqId);
+            cb({ message: err.message || 'No record found', status: err.status || 400 });
         } else {
-            console.log('getUserByIdEmailOrUsername function executed successfully');
-            cb(null, response);
+            if (response == null) {
+                logger.error('getUserByIdEmailOrUsername function has error - No record found', 'userService.getUserByIdEmailOrUsername', 'USER', req.headers.reqId);
+                cb({ status: 400, message: 'No record found' });
+            } else {
+                logger.info('getUserByIdEmailOrUsername function has executed successfully', 'userService.getUserByIdEmailOrUsername', 'USER', req.headers.reqId);
+                cb(null, response);
+            }
         }
     })
 };
