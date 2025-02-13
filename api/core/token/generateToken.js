@@ -10,7 +10,7 @@ exports.generateSignToken = async (id) => {
     const payload = {};
     const option = {
         expiresIn: '59m',
-        issuer: "dheeraj.kumar",
+        issuer: "dheeraj",
         audience: id
     };
 

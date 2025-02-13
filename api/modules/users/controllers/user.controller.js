@@ -45,7 +45,7 @@ const deleteUser = (req, res) => {
 
 const getUsers = (req, res) => {
 
-    userService.getUsers(req.params, (err, response) => {
+    userService.getUsers(req, (err, response) => {
         if (err) {
             logger.error('getUsers function have error in controller', err.message);
             res.status(err.status).json({ status: err.status, message: err.message });

@@ -3,24 +3,24 @@ const date = require('date-and-time');
 const { format } = require('winston');
 const { combine, timestamp, colorize, label, printf } = format;
 
-function handleLog(message, method, endpoint, logTrace, level, logger, url = undefined) {
+function handleLog(message, method, endpoint, reqId, level, logger, url = undefined) {
     const logData = {
         timestamp: date.format(new Date(), "YYYY-MM-DD HH:mm:ss"),
         message,
         method,
         endpoint,
         url,
-        logTrace
+        reqId
     };
     return logger[level](logData);
 };
 
-const customFormat = printf(({ level, message, label, method, endpoint, url, logTrace }) => {
+const customFormat = printf(({ level, message, label, method, endpoint, url, reqId }) => {
 
     let methodColon = method ? '-[Method: ' + method + ']' : '';
     let endpointColon = endpoint ? '-[Endpoint: ' + endpoint + ']' : '';
     let urlColon = url ? '-[Url: ' + url + ']' : '';
-    let logTraceColon = logTrace ? '-[LogTrace: ' + logTrace + ']' : '';
+    let logTraceColon = reqId ? '-[reqId: ' + reqId + ']' : '';
 
     return `${date.format(new Date(), "YYYY-MM-DD HH:mm:ss")}- [${label}]- ${level} - message: ${message}${methodColon}${endpointColon}${urlColon}${logTraceColon}`;
 });
@@ -37,12 +37,12 @@ let errorLogger = winston.createLogger({
     transports: [new winston.transports.Console()]
 });
 
-function info(message, method, endpoint, logTrace = undefined) {
-    handleLog(message, method, endpoint, logTrace, 'info', successLogger);
+function info(message, method, endpoint, reqId = undefined) {
+    handleLog(message, method, endpoint, reqId, 'info', successLogger);
 };
 
-function error(message, method, endpoint, logTrace = undefined) {
-    handleLog(message, method, endpoint, logTrace, 'error', errorLogger);
+function error(message, method, endpoint, reqId = undefined) {
+    handleLog(message, method, endpoint, reqId, 'error', errorLogger);
 };
 
 module.exports = { info, error };
@@ -88,25 +88,25 @@ let errorLogger = winston.createLogger({
     transports: [new winston.transports.Console()]
 });
 
-function handleLog(message, method, endpoint, logTrace, level, logger, url = undefined) {
+function handleLog(message, method, endpoint, reqId, level, logger, url = undefined) {
     const logData = {
         timestamp: date.format(new Date(), "YYYY-MM-DD HH:mm:ss"),
         message,
         method,
         endpoint,
         url,
-        logTrace
+        reqId
     };
 
     return logger[level](logData);
 };
 
-function info(message, method, endpoint, logTrace = undefined) {
-    handleLog(message, method, endpoint, logTrace, 'info', successLogger);
+function info(message, method, endpoint, reqId = undefined) {
+    handleLog(message, method, endpoint, reqId, 'info', successLogger);
 };
 
-function error(message, method, endpoint, logTrace = undefined) {
-    handleLog(message, method, endpoint, logTrace, 'error', errorLogger);
+function error(message, method, endpoint, reqId = undefined) {
+    handleLog(message, method, endpoint, reqId, 'error', errorLogger);
 };
 
 module.exports = { info, error };
