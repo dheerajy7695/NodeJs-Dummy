@@ -1,41 +1,24 @@
-require('dotenv').config();
+const dotenv = require('dotenv');
 const JWT = require('jsonwebtoken');
 
-module.exports = {
+const logger = require('../utils/logger');
+require('dotenv').config();
 
-    signAccessToken: (userId) => {
-        return new Promise((resolve, reject) => {
 
-            const payload = {};
-            const secret = process.env.ACCESS_TOKEN_SECRET;
-            const option = {
-                expiresIn: "10m",
-                issuer: "Dheera.kumar",
-                audience: userId
-            }
+exports.generateSignToken = async (id) => {
 
-            JWT.sign(payload, secret, option, (err, token) => {
-                if (err) reject(err);
-                resolve(token);
-            })
-        })
-    },
+    const payload = {};
+    const option = {
+        expiresIn: '59m',
+        issuer: "dheeraj.kumar",
+        audience: id
+    };
 
-    // signRefreshToken: (userId) => {
-    //     return new Promise((resolve, reject) => {
-
-    //         const payload = {};
-    //         const secret = process.env.REFRESH_TOKEN_SECRET;
-    //         const option = {
-    //             expiresIn: "1d",
-    //             issuer: "Dheera.kumar",
-    //             audience: userId
-    //         }
-
-    //         JWT.sign(payload, secret, option, (err, token) => {
-    //             if (err) reject(err);
-    //             resolve(token);
-    //         })
-    //     })
-    // }
+    try {
+        const token = await JWT.sign(payload, process.env.ACCESS_TOKEN_SECRET, option);
+        logger.info('generateSignToken function is executed successfully for user', id);
+        return token;
+    } catch (err) {
+        logger.info('generateSignToken function has error', err);
+    }
 };

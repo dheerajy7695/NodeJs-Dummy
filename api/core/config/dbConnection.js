@@ -3,17 +3,15 @@ const logger = require('../../core/utils/logger');
 
 // const dbUrl = require('./dbSource');
 
-const dbUrl = { dbUrl: "mongodb://localhost:27017/localdb1" };
-
-mongoose.set('useCreateIndex', true);
+const dbUrl = { dbUrl: "mongodb://localhost:27017/localDB" };
 
 module.exports.dbConnection = () => {
-    mongoose.connect(dbUrl.dbUrl, { useNewUrlParser: true, useUnifiedTopology: true })
+    mongoose.connect(dbUrl.dbUrl, {})
         .then(() => {
             logger.info('Database connected successfully');
             return 'Connection established successfully';
         }).catch(err => {
             logger.error('Could not connect with database, Exiting now ...', err);
-            return 'Could not connect with database';
+            process.exit(1);
         });
 };
